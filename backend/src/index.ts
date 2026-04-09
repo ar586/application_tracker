@@ -13,35 +13,46 @@ mongoose.set("bufferCommands", false);
 let cachedConnection: Promise<typeof mongoose> | null = null;
 
 const connectDB = async () => {
-    // If already connected, return
-    if (mongoose.connection.readyState === 1) {
+    // 1. If we are already fully connected, just return
+    if ((mongoose.connection.readyState as number) === 1) {
         return;
     }
 
-    // throw error if URI is missing
+    // 2. Check for URI
     if (!MONGODB_URI) {
         throw new Error("MONGODB_URI is missing from Vercel environment variables!");
     }
 
-    // If a connection is already in progress, wait for it
+    // 3. If a connection is already in progress, wait for it
     if (cachedConnection) {
-        console.log("Waiting for existing connection attempt...");
-        await cachedConnection;
-        return;
+        console.log("Waiting for existing connection promise...");
+        try {
+            await cachedConnection;
+            if ((mongoose.connection.readyState as number) === 1) return;
+        } catch (err) {
+            cachedConnection = null; // Reset for retry
+        }
     }
 
+    // 4. Start a new connection attempt
     try {
-        console.log("Connecting to MongoDB Atlas (New Attempt)...");
+        console.log("Starting fresh MongoDB connection attempt...");
         cachedConnection = mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 8000, // 8 seconds
         });
 
         await cachedConnection;
+
+        // Final sanity check
+        if ((mongoose.connection.readyState as number) !== 1) {
+            throw new Error(`Connection state is ${mongoose.connection.readyState} after connect() resolved`);
+        }
+
         console.log("MongoDB Connected Successfully");
     } catch (error: any) {
-        console.error("MongoDB Connection Error:", error);
-        cachedConnection = null; // Reset so next request can try again
-        throw new Error(`DB Connection Failed: ${error.message}`);
+        console.error("CRITICAL MongoDB Connection Error:", error);
+        cachedConnection = null;
+        throw new Error(`Production DB Error: ${error.message}`);
     }
 };
 
@@ -56,8 +67,17 @@ if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
 
 // Ensure DB is connected for every request on Vercel (serverless)
 app.use(async (req, res, next) => {
-    await connectDB();
-    next();
+    try {
+        await connectDB();
+        next();
+    } catch (err: any) {
+        console.error("Middleware DB Failure:", err);
+        res.status(500).json({
+            error: "Database Connectivity Error",
+            details: err.message,
+            state: mongoose.connection.readyState
+        });
+    }
 });
 
 export default app;
