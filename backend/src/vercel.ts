@@ -10,14 +10,27 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/app_tr
 let isConnected = false;
 
 const connectDB = async () => {
-    if (isConnected) return;
+    if (isConnected || mongoose.connection.readyState === 1) {
+        isConnected = true;
+        return;
+    }
+
+    if (!process.env.MONGODB_URI) {
+        throw new Error("MONGODB_URI is not defined in environment variables");
+    }
+
     try {
-        console.log("Connecting to MongoDB... URI starts with:", MONGODB_URI.substring(0, 20));
-        await mongoose.connect(MONGODB_URI);
+        console.log("Connecting to MongoDB Atlas...");
+        await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000, // Fail faster if it's a network issue
+        });
+        isConnected = true;
+        console.log("Connected to MongoDB successfully");
         isConnected = true;
         console.log("Connected to MongoDB via Vercel Handler");
     } catch (error) {
-        console.error("MongoDB connection error:", error);
+        console.error("MongoDB connection error details:", error);
+        throw error;
     }
 };
 
