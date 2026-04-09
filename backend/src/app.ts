@@ -20,7 +20,11 @@ app.use("/api/applications", applicationRoutes);
 
 // Routes will be added here
 app.get("/api/health", (req, res) => {
-    res.json({ status: "ok" });
+    res.json({
+        status: "ok",
+        version: "1.0.8",
+        buildTime: "2026-04-09T22:35:00Z"
+    });
 });
 
 export default app;
