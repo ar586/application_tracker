@@ -30,9 +30,9 @@ app.get("/api/health", async (req, res) => {
 
     res.json({
         status: "ok",
-        version: "1.0.9",
+        version: "1.1.0",
         dbConnection: dbStatus,
-        buildTime: "2026-04-09T22:42:00"
+        buildTime: "2026-04-09T22:50:00"
     });
 });
 
