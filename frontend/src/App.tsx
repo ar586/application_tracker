@@ -19,10 +19,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
             </Routes>
           </ToastProvider>
         </AuthProvider>
