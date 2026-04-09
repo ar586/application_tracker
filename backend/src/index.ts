@@ -10,27 +10,37 @@ const MONGODB_URI = process.env.MONGODB_URI;
 // Disable Mongoose buffering globally to fail fast on connection issues
 mongoose.set("bufferCommands", false);
 
-let isConnected = false;
+let cachedConnection: Promise<typeof mongoose> | null = null;
 
 const connectDB = async () => {
-    if (isConnected || mongoose.connection.readyState === 1) {
-        isConnected = true;
+    // If already connected, return
+    if (mongoose.connection.readyState === 1) {
         return;
     }
 
+    // throw error if URI is missing
     if (!MONGODB_URI) {
         throw new Error("MONGODB_URI is missing from Vercel environment variables!");
     }
 
+    // If a connection is already in progress, wait for it
+    if (cachedConnection) {
+        console.log("Waiting for existing connection attempt...");
+        await cachedConnection;
+        return;
+    }
+
     try {
-        console.log("Connecting to MongoDB...");
-        await mongoose.connect(MONGODB_URI, {
+        console.log("Connecting to MongoDB Atlas (New Attempt)...");
+        cachedConnection = mongoose.connect(MONGODB_URI, {
             serverSelectionTimeoutMS: 5000,
         });
-        isConnected = true;
+
+        await cachedConnection;
         console.log("MongoDB Connected Successfully");
     } catch (error: any) {
         console.error("MongoDB Connection Error:", error);
+        cachedConnection = null; // Reset so next request can try again
         throw new Error(`DB Connection Failed: ${error.message}`);
     }
 };
