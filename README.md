@@ -1,70 +1,60 @@
-# Application Tracker
+# AI-Assisted Job Application Tracker
 
-A MERN stack web application for tracking job applications using a Kanban board. Powered by Google Gemini AI, it automatically parses job descriptions, fills in application fields, and generates tailored resume bullet points to help you land your dream job faster.
+A modern MERN-stack application for tracking job applications with a full Kanban board and AI-powered automation.
 
-## Features
+## ✨ Features
+- **📊 Stats Dashboard**: track progress across all application stages (Applied, Screens, Interviews, etc.).
+- **🏷️ Enhanced Cards**: View **Skill Tags** and **Location** directly on the board.
+- **🚀 AI Parsing**: Automatically extract job details (Company, Role, Skills, etc.) from raw job descriptions using **Llama 3.1** (via Groq).
+- **📋 Resume Tailoring**: Generate 3-5 specific resume bullet points tailored to any job description instantly.
+- **🍞 Premium UX**: Real-time toast notifications for all actions and smooth drag-and-drop.
+- **🔒 Secure Auth**: JWT-based authentication for personal application tracking.
 
-- **JWT Authentication**: Register, Login, and persistent sessions.
-- **Kanban Board**: Drag-and-drop applications across columns (Applied, Phone Screen, Interview, Offer, Rejected).
-- **AI Integration**: Paste a Job Description and click "Parse with AI". Gemini AI automatically extracts the company, role, salary range, seniority, location, and required skills.
-- **Tailored Resume Generator**: Gemini AI generates highly custom resume bullet points based off of the Job Description for quick access.
-- **Beautiful UI**: Modern aesthetics using Tailwind CSS V4, Lucide Icons, and `@hello-pangea/dnd`.
+## 🛠️ Tech Stack
+- **Frontend**: Vite (React + TS), Tailwind CSS V4, React Query, `@hello-pangea/dnd`.
+- **Backend**: Node.js, Express, TypeScript (ESM), Mongoose.
+- **AI**: Groq SDK (Llama 3.1 8B).
 
-## Tech Stack
-
-- **Frontend**: Vite, React, TypeScript, Tailwind CSS, Tanstack React Query, `@hello-pangea/dnd`, React Hook Form, Zod.
-- **Backend**: Node.js, Express, TypeScript, MongoDB (Mongoose), `bcrypt`, `jsonwebtoken`, `@google/genai`.
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-
 - Node.js (v18+)
-- MongoDB (Local or Atlas URI)
-- Google Gemini API Key
+- MongoDB (Atlas or Local)
+- Groq API Key (Free from [console.groq.com](https://console.groq.com))
 
-### Setup Instructions
+### Installation
 
-1. **Clone the repository:**
+1. **Clone & Install**:
    ```bash
-   git clone <your-repo>
+   git clone <repo-url>
    cd application_tracker
+   cd backend && npm install
+   cd ../frontend && npm install
    ```
 
-2. **Backend Setup:**
-   ```bash
-   cd backend
-   npm install
-   
-   # Duplicate .env.example
-   cp .env.example .env
-   # Add your MONGODB_URI and GEMINI_API_KEY to the .env file
+2. **Environment Setup**:
+   - In `backend/`: `cp .env.example .env` (Add your `MONGODB_URI`, `GROQ_API_KEY`, etc.)
+   - In `frontend/`: `cp .env.example .env` (Add your `VITE_API_URL`)
 
-   npm run dev
-   ```
+3. **Run Locally**:
+   - Backend: `npm run dev` (Port 5000)
+   - Frontend: `npm run dev` (Port 5173)
 
-3. **Frontend Setup:**
-   ```bash
-   # In a new terminal
-   cd frontend
-   npm install
-   npm run dev
-   ```
+## 🌐 Deployment
 
-4. Open your browser and navigate to the frontend URL (usually `http://localhost:5173`).
+### Frontend (Vercel)
+1. Deploy the `frontend` folder.
+2. Set `VITE_API_URL` to your production backend URL.
+3. The included `vercel.json` handles SPA routing.
 
-## Environment Variables
+### Backend (Vercel or Render)
 
-Include a `.env` in the `backend/` directory with the following variables:
+#### Vercel (Recommended)
+1. Deploy the `backend` folder as a separate project.
+2. Vercel will use `vercel.json` and the `src/vercel.ts` handler automatically.
+3. Set all environment variables (from `.env.example`) in the Vercel Dashboard.
 
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/app_tracker
-JWT_SECRET=yoursupersecretjwtkey_123!
-GEMINI_API_KEY=your_google_gemini_api_key_here
-```
-
-## AI Implementation Decisions
-- The AI Parse feature is handled entirely on the backend in the `aiService.ts` layer.
-- `responseSchema` is configured in the Gemini model config to guarantee a highly-structured and reliable JSON return format adhering exactly to the Mongoose schema requirements.
-- Uses `hello-pangea/dnd` avoiding old deprecated React-Beautiful-DnD, guaranteeing modern React 18 compatability.
+#### Render.com / Railway
+1. Use the provided `render.yaml` for one-click setup.
+2. Build command: `npm run build`
+3. Start command: `npm start`
