@@ -6,10 +6,14 @@ dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/app_tracker";
 
+// Disable command buffering so we fail fast if not connected
+mongoose.set("bufferCommands", false);
+
 // Helper to ensure MongoDB is connected before handling requests
 let isConnected = false;
 
 const connectDB = async () => {
+    console.log("Current Mongo State:", mongoose.connection.readyState);
     if (isConnected || mongoose.connection.readyState === 1) {
         isConnected = true;
         return;
@@ -20,14 +24,12 @@ const connectDB = async () => {
     }
 
     try {
-        console.log("Connecting to MongoDB Atlas...");
+        console.log("Connecting to MongoDB Atlas (5s timeout)...");
         await mongoose.connect(process.env.MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000, // Fail faster if it's a network issue
+            serverSelectionTimeoutMS: 5000,
         });
         isConnected = true;
         console.log("Connected to MongoDB successfully");
-        isConnected = true;
-        console.log("Connected to MongoDB via Vercel Handler");
     } catch (error) {
         console.error("MongoDB connection error details:", error);
         throw error;
