@@ -19,8 +19,7 @@ const connectDB = async () => {
     }
 
     if (!MONGODB_URI) {
-        console.error("MONGODB_URI is missing from environment variables!");
-        return;
+        throw new Error("MONGODB_URI is missing from Vercel environment variables!");
     }
 
     try {
@@ -30,10 +29,9 @@ const connectDB = async () => {
         });
         isConnected = true;
         console.log("MongoDB Connected Successfully");
-    } catch (error) {
+    } catch (error: any) {
         console.error("MongoDB Connection Error:", error);
-        // Do not throw here to allow the process to stay alive if it's a transient error,
-        // but queries will fail fast due to bufferCommands: false
+        throw new Error(`DB Connection Failed: ${error.message}`);
     }
 };
 
