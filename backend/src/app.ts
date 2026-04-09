@@ -1,14 +1,26 @@
 import express from "express";
 import cors from "cors";
-import mongoose from "mongoose";
+import { connectDB } from "./config/db.js";
 
 const app = express();
 
+// CORS
 app.use(cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
 }));
 app.use(express.json());
+
+// ✅ Connect DB BEFORE any routes, for every request
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err: any) {
+        console.error("DB Middleware Error:", err.message);
+        res.status(500).json({ error: "Database Connectivity Error", details: err.message });
+    }
+});
 
 import authRoutes from "./routes/authRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
@@ -16,23 +28,11 @@ import applicationRoutes from "./routes/applicationRoutes.js";
 app.use("/api/auth", authRoutes);
 app.use("/api/applications", applicationRoutes);
 
-// Routes will be added here
-app.get("/api/health", async (req, res) => {
-    let dbStatus = "Checking...";
-    try {
-        const client = new mongoose.mongo.MongoClient(process.env.MONGODB_URI!, { serverSelectionTimeoutMS: 2000 });
-        await client.connect();
-        dbStatus = "Connected!";
-        await client.close();
-    } catch (err: any) {
-        dbStatus = `Failed: ${err.message}`;
-    }
-
+app.get("/api/health", (req, res) => {
     res.json({
         status: "ok",
-        version: "1.1.0",
-        dbConnection: dbStatus,
-        buildTime: "2026-04-09T22:50:00"
+        version: "1.2.0",
+        buildTime: "2026-04-09T22:52:00"
     });
 });
 
