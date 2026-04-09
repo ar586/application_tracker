@@ -7,52 +7,46 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-// Disable Mongoose buffering globally to fail fast on connection issues
-mongoose.set("bufferCommands", false);
+// Re-enable buffering but with a clear timeout to avoid the 10s hang
+// This allows Mongoose to wait gracefully for a connection on cold starts
+mongoose.set("bufferCommands", true);
+mongoose.set("bufferTimeoutMS", 5000);
 
 let cachedConnection: Promise<typeof mongoose> | null = null;
 
 const connectDB = async () => {
-    // 1. If we are already fully connected, just return
+    // If already connected, return
     if ((mongoose.connection.readyState as number) === 1) {
         return;
     }
 
-    // 2. Check for URI
     if (!MONGODB_URI) {
         throw new Error("MONGODB_URI is missing from Vercel environment variables!");
     }
 
-    // 3. If a connection is already in progress, wait for it
+    // If a connection is already in progress, wait for it
     if (cachedConnection) {
-        console.log("Waiting for existing connection promise...");
         try {
             await cachedConnection;
-            if ((mongoose.connection.readyState as number) === 1) return;
+            return;
         } catch (err) {
             cachedConnection = null; // Reset for retry
         }
     }
 
-    // 4. Start a new connection attempt
     try {
-        console.log("Starting fresh MongoDB connection attempt...");
+        console.log("Connecting to MongoDB Atlas...");
         cachedConnection = mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 8000, // 8 seconds
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
         });
 
         await cachedConnection;
-
-        // Final sanity check
-        if ((mongoose.connection.readyState as number) !== 1) {
-            throw new Error(`Connection state is ${mongoose.connection.readyState} after connect() resolved`);
-        }
-
         console.log("MongoDB Connected Successfully");
     } catch (error: any) {
-        console.error("CRITICAL MongoDB Connection Error:", error);
+        console.error("MongoDB Connection Error:", error);
         cachedConnection = null;
-        throw new Error(`Production DB Error: ${error.message}`);
+        throw new Error(`DB Connection Failed: ${error.message}`);
     }
 };
 
@@ -75,7 +69,7 @@ app.use(async (req, res, next) => {
         res.status(500).json({
             error: "Database Connectivity Error",
             details: err.message,
-            state: mongoose.connection.readyState
+            mongoState: mongoose.connection.readyState
         });
     }
 });
