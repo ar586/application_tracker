@@ -12,6 +12,7 @@ let isConnected = false;
 const connectDB = async () => {
     if (isConnected) return;
     try {
+        console.log("Connecting to MongoDB... URI starts with:", MONGODB_URI.substring(0, 20));
         await mongoose.connect(MONGODB_URI);
         isConnected = true;
         console.log("Connected to MongoDB via Vercel Handler");

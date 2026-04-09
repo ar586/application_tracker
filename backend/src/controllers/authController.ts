@@ -42,8 +42,9 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         } else {
             res.status(400).json({ error: "Invalid user data" });
         }
-    } catch (error) {
-        res.status(500).json({ error: "Server error during registration" });
+    } catch (error: any) {
+        console.error("Registration Error:", error);
+        res.status(500).json({ error: "Server error during registration", details: error.message });
     }
 };
 
@@ -62,7 +63,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         } else {
             res.status(401).json({ error: "Invalid email or password" });
         }
-    } catch (error) {
-        res.status(500).json({ error: "Server error during login" });
+    } catch (error: any) {
+        console.error("Login Error:", error);
+        res.status(500).json({ error: "Server error during login", details: error.message });
     }
 };
