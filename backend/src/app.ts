@@ -17,11 +17,22 @@ app.use("/api/auth", authRoutes);
 app.use("/api/applications", applicationRoutes);
 
 // Routes will be added here
-app.get("/api/health", (req, res) => {
+app.get("/api/health", async (req, res) => {
+    let dbStatus = "Checking...";
+    try {
+        const client = new mongoose.mongo.MongoClient(process.env.MONGODB_URI!, { serverSelectionTimeoutMS: 2000 });
+        await client.connect();
+        dbStatus = "Connected!";
+        await client.close();
+    } catch (err: any) {
+        dbStatus = `Failed: ${err.message}`;
+    }
+
     res.json({
         status: "ok",
-        version: "1.0.8",
-        buildTime: "2026-04-09T22:35:00Z"
+        version: "1.0.9",
+        dbConnection: dbStatus,
+        buildTime: "2026-04-09T22:42:00"
     });
 });
 
