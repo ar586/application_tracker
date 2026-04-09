@@ -3,7 +3,7 @@
 A modern MERN-stack application for tracking job applications with a full Kanban board and AI-powered automation.
 
 ## ✨ Features
-- **📊 Stats Dashboard**: track progress across all application stages (Applied, Screens, Interviews, etc.).
+- **📊 Stats Dashboard**: Track progress across all application stages (Applied, Screens, Interviews, etc.).
 - **🏷️ Enhanced Cards**: View **Skill Tags** and **Location** directly on the board.
 - **🚀 AI Parsing**: Automatically extract job details (Company, Role, Skills, etc.) from raw job descriptions using **Llama 3.1** (via Groq).
 - **📋 Resume Tailoring**: Generate 3-5 specific resume bullet points tailored to any job description instantly.
@@ -42,19 +42,15 @@ A modern MERN-stack application for tracking job applications with a full Kanban
 
 ## 🌐 Deployment
 
-### Frontend (Vercel)
-1. Deploy the `frontend` folder.
-2. Set `VITE_API_URL` to your production backend URL.
-3. The included `vercel.json` handles SPA routing.
+### Unified Vercel Deployment (Recommended)
+1. Connect the **root** folder of this repository to Vercel.
+2. Vercel will automatically detect the root `vercel.json` and deploy both services (`experimentalServices`).
+3. **Frontend**: Served at `/`.
+4. **Backend**: Served at `/_/backend` (internal API).
+5. **Environment Variables**: Set all variables from `.env.example` in the Vercel project settings.
+   - For `VITE_API_URL`, use `/_/backend/api`.
 
-### Backend (Vercel or Render)
-
-#### Vercel (Recommended)
-1. Deploy the `backend` folder as a separate project.
-2. Vercel will use `vercel.json` and the `src/vercel.ts` handler automatically.
-3. Set all environment variables (from `.env.example`) in the Vercel Dashboard.
-
-#### Render.com / Railway
-1. Use the provided `render.yaml` for one-click setup.
-2. Build command: `npm run build`
+### Alternative Backend (Render.com / Railway)
+1. Use the provided `render.yaml` for one-click setup on Render.
+2. Build command: `npm install && npm run build`
 3. Start command: `npm start`
