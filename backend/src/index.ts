@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import app from "./app.js";
 
 dotenv.config();
 
@@ -8,9 +7,12 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Re-enable buffering but with a clear timeout to avoid the 10s hang
-// This allows Mongoose to wait gracefully for a connection on cold starts
+// IMPORTANT: This must be set BEFORE importing app/models
 mongoose.set("bufferCommands", true);
 mongoose.set("bufferTimeoutMS", 5000);
+
+// Now import app (which will import models)
+import app from "./app.js";
 
 let cachedConnection: Promise<typeof mongoose> | null = null;
 
