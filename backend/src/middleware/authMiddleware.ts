@@ -12,7 +12,12 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction): vo
         try {
             token = req.headers.authorization.split(" ")[1];
 
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecretjwt") as { userId: string };
+            if (!token) {
+                res.status(401).json({ error: "Not authorized, token missing" });
+                return;
+            }
+
+            const decoded = (jwt.verify(token, process.env.JWT_SECRET || "supersecretjwt") as unknown) as { userId: string };
 
             req.userId = decoded.userId;
             next();
